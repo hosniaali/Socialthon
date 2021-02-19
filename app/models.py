@@ -20,7 +20,7 @@ AGE = (
 )
 
 STATUS = (
-    (1, 'تمت التقديم'),
+    (1, 'تم التقديم'),
     (2, 'جاري المراجعة'),
     (3, 'جاري الإعانة'),
     (4, 'تمت الإعانة'),
@@ -29,8 +29,8 @@ STATUS = (
 
 
 class Users(models.Model):
-    id_no = models.CharField(_('رقم الهوية/الإقامة'), max_length=10)
-    phone_no = models.CharField(_('رقم الجوال'), max_length=20)
+    id_no = models.CharField(_('رقم الهوية/الإقامة'), max_length=10, unique=True)
+    phone_no = models.CharField(_('رقم الجوال'), max_length=20, unique=True)
     region = models.CharField(_('المنطقة'), max_length=30)
     age = models.IntegerField(_('العمر'))
     gender = models.IntegerField(_('الجنس'), choices=GENDER, default=1)
@@ -41,11 +41,11 @@ class Users(models.Model):
         verbose_name_plural = 'المحتاجين'
 
     def __str__(self):
-        return self.name
+        return self.id_no
 
 
 class Charities(User):
-    name = models.CharField(_('اسم الجمعية'), max_length=100)
+    name = models.CharField(_('اسم الجمعية'), max_length=100, unique=True)
     region = models.CharField(_('المنطقة'), max_length=30)
     age = models.IntegerField(_('الفئة العمرية'), choices=AGE, default=1)
     gender = models.IntegerField(_('الفئة النوعية'), choices=C_GENDER, default=1)
@@ -63,7 +63,7 @@ class Charities(User):
 
 class Donations(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name=_('المحتاج'))
-    charity = models.ForeignKey(Charities, on_delete=models.CASCADE, verbose_name=_('الجمعية'))
+    charity = models.ForeignKey(Charities, on_delete=models.CASCADE, verbose_name=_('الجمعية'), null=True)
     donated_type = models.ForeignKey('DonationType', on_delete=models.CASCADE, verbose_name=_('نوع الإعانة'))
     segment_type = models.ForeignKey('Segment', on_delete=models.CASCADE, verbose_name=_('نوع فئة الإعانة'))
     status = models.IntegerField(_('حالة الإعانة'), choices=STATUS, default=1)
@@ -94,7 +94,7 @@ class Segment(models.Model):
 
     class Meta:
         ordering = ['-date_created']
-        verbose_name_plural = 'نوع فئة الإعانات'
+        verbose_name_plural = ' فئة المحتاجين'
 
     def __str__(self):
         return self.type
@@ -106,7 +106,7 @@ class SegmentActivity(models.Model):
 
     class Meta:
         ordering = ['-date_created']
-        verbose_name_plural = 'فئة انشطة الجميعات'
+        verbose_name_plural = 'الفئة المستهدفة للجمعية'
 
     def __str__(self):
         return '{} - {}'.format(self.charity.name, self.donated_type.type)
