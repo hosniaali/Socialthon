@@ -1,0 +1,1 @@
+from Socialthon.wsgi import application
